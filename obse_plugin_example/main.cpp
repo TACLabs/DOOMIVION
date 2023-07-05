@@ -292,6 +292,51 @@ void __declspec(naked) NoFallDamagePourLePlayer()
 	}
 }
 
+double __cdecl retourneVitesseQueJeVeux()
+{
+	//A faire : donner une valeur plus grande si le joueur est IN THE AIR
+	if (jumpState && *jumpState == 2)
+	{
+		return 550;
+	}
+	else
+	{
+		return 450;
+	}
+}
+
+
+int Calc_RunSpeed = 0x547D00;
+int retourDuHook = 0x5E3830;
+int* comparaisonPointeur3;
+void __declspec(naked) hookRunSpeed()
+{
+	_asm {
+		fstp dword ptr[esp]
+		mov comparaisonPointeur3, esp
+	}
+	if ((unsigned)comparaisonPointeur3 == 1701536)
+	{
+		//C'EST LE JOUEUR, ET LE JOUEUR A UNE VITESSE FIXE
+		_asm {
+			call retourneVitesseQueJeVeux
+			add esp, 0x18
+			fstp dword ptr[esp + 0x8]
+			jmp retourDuHook
+		}
+	}
+	else
+	{
+		_asm {
+			call Calc_RunSpeed
+			add esp, 0x18
+			fstp dword ptr[esp + 0x8]
+			jmp retourDuHook
+		}
+	}
+
+
+}
 
 void leTrucDesSounds()
 {
@@ -474,7 +519,7 @@ bool OBSEPlugin_Load(const OBSEInterface * obse)
 		//Retire les dégats de chute pour le joueur
 		WriteJump(0x5EFE2D, 0x5EFE49, (int)NoFallDamagePourLePlayer);
 
-		
+		WriteJump(0x5E3821, 0x5E3830, (int)hookRunSpeed);
 
 	}
 
