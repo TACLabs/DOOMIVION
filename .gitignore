@@ -11,3 +11,6 @@
 /obse/loader/Debug
 /obse/loader_common/Debug
 /obse/steam_loader/Debug
+/obse_plugin_example/Debug
+/obse_plugin_example/Release
+/obse_plugin_example/.vs

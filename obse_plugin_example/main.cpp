@@ -69,7 +69,7 @@ std::vector<unsigned int> dashControlKeyOffsets;
 uintptr_t fJumpHeightMinAddr, fJumpHeightMaxAddr;
 float* fJumpHeightMin;
 float* fJumpHeightMax;
-float jumpHeight = 150.00;
+float jumpHeight = 169.00;
 
 
 
@@ -156,8 +156,8 @@ DWORD WINAPI dashThread(HMODULE hModule)
 					Actor* actor = OBLIVION_CAST(*g_thePlayer, TESObjectREFR, Actor);
 					MiddleHighProcess* mhProc = OBLIVION_CAST(actor->process, BaseProcess, MiddleHighProcess);
 					ahkCharacterProxy* proxy = (ahkCharacterProxy*)(mhProc->charProxy->hkObj);
-					proxy->velocity.x = proxy->velocity.x * 5;
-					proxy->velocity.y = proxy->velocity.y * 5;
+					proxy->velocity.x = proxy->velocity.x * 6.9;
+					proxy->velocity.y = proxy->velocity.y * 6.9;
 					proxy->velocity.z = 50;
 
 					if (nbDashes == 0)
@@ -294,15 +294,7 @@ void __declspec(naked) NoFallDamagePourLePlayer()
 
 double __cdecl retourneVitesseQueJeVeux()
 {
-	//A faire : donner une valeur plus grande si le joueur est IN THE AIR
-	if (jumpState && *jumpState == 2)
-	{
-		return 550;
-	}
-	else
-	{
-		return 450;
-	}
+	return 500;
 }
 
 
