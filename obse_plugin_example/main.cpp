@@ -12,15 +12,6 @@
 #include "Windows.h"
 #include <TlHelp32.h>
 
-
-TESSound* doubleJumpTESSoundOne;
-TESSound* doubleJumpTESSoundTwo;
-TESSound* dashTESSoundOne;
-TESSound* dashTESSoundTwo;
-TESSound* dashTESSoundReloadOne;
-TESSound* dashTESSoundReloadTwo;
-
-
 std::string doubleJumpSoundOneFilePath = GetOblivionDirectory() + "Data\\Sound\\fx\\DOOOOM\\DoubleJump\\doublejump1.wav";
 BYTE* doubleJumpSoundOne;
 DWORD doubleJumpSoundOneFileSize;
@@ -367,9 +358,6 @@ void InitLesSounds()
 	{
 		leTrucDesSounds();
 
-		//JEN PROFITE POUR INIT TOUT MON BORDEL AVEC LE DASH
-		
-
 		doOnceleInitParContre = 1;
 	}
 }
@@ -511,6 +499,7 @@ bool OBSEPlugin_Load(const OBSEInterface * obse)
 		//Retire les dégats de chute pour le joueur
 		WriteJump(0x5EFE2D, 0x5EFE49, (int)NoFallDamagePourLePlayer);
 
+		//Permet au joueur d'avoir une vitesse FIXE tout le long du jeu, parce que je l'ai décidé ainsi, et il va RIEN faire
 		WriteJump(0x5E3821, 0x5E3830, (int)hookRunSpeed);
 
 	}
