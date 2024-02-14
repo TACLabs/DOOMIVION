@@ -102,6 +102,7 @@
       <Filter>obse</Filter>
     </ClInclude>
     <ClInclude Include="sound.h" />
+    <ClInclude Include="memory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\obse\obse\GameRTTI_1_2_416.inl">
