@@ -6,7 +6,7 @@
 #include "obse/Utilities.h"
 
 #include "sound.h"
-#include "memory.h"
+
 
 #include <Mmsystem.h>
 #include "Windows.h"
@@ -61,6 +61,9 @@ uintptr_t fJumpHeightMinAddr, fJumpHeightMaxAddr;
 float* fJumpHeightMin;
 float* fJumpHeightMax;
 float jumpHeight = 169.00;
+
+
+
 
 int doubleJumpSoundRetour = 0x89071A;
 void __declspec(naked) doubleJump()
@@ -121,26 +124,6 @@ const int conversionCodeDeClavier[264] = { VK_ESCAPE /* Escape */,
 										 VK_UP, VK_PRIOR, VK_LEFT, VK_RIGHT, VK_END, VK_DOWN, VK_NEXT, VK_INSERT, VK_DELETE, VK_LBUTTON, VK_RBUTTON, VK_MBUTTON
 };
 
-
-//Tentative foirée d'empêcher que la velocité se fasse réinitialiser quand on rencontre en collision avec la friction du sol, pour pouvoir dasher au sol comme dans DOOM Eternal, tant pis
-int retourPVBRH = 0x8AC0BB;
-float* valeurFoutue;
-__declspec(naked) void PreventVelocityBrutalResetHook()
-{
-	_asm {
-		mov eax, [esp + 0x4]
-		movaps xmm0, [eax]
-		movaps[ecx + 0x10], xmm0
-		cestZero:
-		jmp retourPVBRH
-	}
-}
-
-//Remplacé par juste ajouter +50 à la Pos Z du joueur 
-uintptr_t playerZPosBasePtr;
-uintptr_t playerZPosPtr;
-float* playerZPos;
-
 int needToReloadLeDash = 0;
 int* isInGameMode;
 DWORD WINAPI dashThread(HMODULE hModule)
@@ -149,14 +132,12 @@ DWORD WINAPI dashThread(HMODULE hModule)
 	AllocConsole();
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
-	printf("%p\n", (void*)playerZPos);
 	*/
 
 	unsigned char* dashControlKey = (unsigned char*)dashControlKeyPtr;
 	
 	while (true) 
 	{
-
 		if (GetAsyncKeyState(conversionCodeDeClavier[(unsigned int)*dashControlKey - 1]) & 1) 
 		{
 			if (*isInGameMode == 1)
@@ -166,7 +147,6 @@ DWORD WINAPI dashThread(HMODULE hModule)
 					Actor* actor = OBLIVION_CAST(*g_thePlayer, TESObjectREFR, Actor);
 					MiddleHighProcess* mhProc = OBLIVION_CAST(actor->process, BaseProcess, MiddleHighProcess);
 					ahkCharacterProxy* proxy = (ahkCharacterProxy*)(mhProc->charProxy->hkObj);
-					*playerZPos += 169;
 					proxy->velocity.x = proxy->velocity.x * 6.9;
 					proxy->velocity.y = proxy->velocity.y * 6.9;
 					proxy->velocity.z = 50;
@@ -200,7 +180,6 @@ DWORD WINAPI dashThread(HMODULE hModule)
 	}
 }
 
-
 void __declspec(naked) initLesInformations()
 {
 	if (doOnce == 0)
@@ -222,11 +201,6 @@ void __declspec(naked) initLesInformations()
 			dashControlKeyPtr = *(uintptr_t*)dashControlKeyPtr;
 			dashControlKeyPtr += dashControlKeyOffsets[i];
 		}
-
-		playerZPosPtr = playerZPosBasePtr;
-		playerZPosPtr = *(uintptr_t*)playerZPosPtr;
-		playerZPosPtr += 0x34;
-		playerZPos = (float*)playerZPosPtr;
 
 		CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)dashThread, NULL, 0, nullptr));
 
@@ -418,6 +392,49 @@ __declspec(naked) void UpdateLesSoundsHook()
 	}
 }
 
+
+bool WriteMemory(int address, char* data, int length)
+{
+	DWORD oldProtect = 0;
+
+	if (VirtualProtect((void*)address, length, PAGE_EXECUTE_READWRITE, &oldProtect))
+	{
+		memcpy((void*)address, data, length);
+		if (VirtualProtect((void*)address, length, oldProtect, &oldProtect))
+			return true;
+	}
+
+	return false;
+}
+
+void Nope(int address, int length)
+{
+	char* nopArray = new char[length];
+	memset(nopArray, 0x90, length);
+
+	WriteMemory(address, nopArray, length);
+	delete[] nopArray;
+}
+
+bool WriteJump(int addressFrom1, int addressFrom2, int addressTo)
+{
+	DWORD oldProtect = 0;
+
+	int len1 = addressFrom2 - addressFrom1;
+	if (VirtualProtect((void*)addressFrom1, len1, PAGE_EXECUTE_READWRITE, &oldProtect))
+	{
+		*((unsigned char*)addressFrom1) = (unsigned char)0xE9;
+		*((int*)(addressFrom1 + 1)) = (int)addressTo - addressFrom1 - 5;
+		for (int i = 5; i < len1; i++)
+			*((unsigned char*)(i + addressFrom1)) = (unsigned char)0x90;
+		if (VirtualProtect((void*)addressFrom1, len1, oldProtect, &oldProtect))
+			return true;
+	}
+
+	return false;
+}
+
+
 extern "C" {
 
 bool OBSEPlugin_Query(const OBSEInterface * obse, PluginInfo * info)
@@ -463,8 +480,6 @@ bool OBSEPlugin_Load(const OBSEInterface * obse)
 		dashControlKeyBasePtr = moduleBase + 0x733398;
 		dashControlKeyOffsets = { 0x20, 0x1b7e + 0xa };
 
-		playerZPosBasePtr = moduleBase + 0x7333B4;
-
 		//Petit coup de nope pour retirer la baisse de stamina lors du premier saut
 		Nope(0x672A9B, 5);
 
@@ -487,8 +502,6 @@ bool OBSEPlugin_Load(const OBSEInterface * obse)
 		//Permet au joueur d'avoir une vitesse FIXE tout le long du jeu, parce que je l'ai décidé ainsi, et il va RIEN faire
 		WriteJump(0x5E3821, 0x5E3830, (int)hookRunSpeed);
 
-		//Empêche un changement brutal de la vélocité, ce qui permet de DASH sur le sol
-		//WriteJump(0x8AC0B0, 0x8AC0B7, (int)PreventVelocityBrutalResetHook);
 	}
 
 	

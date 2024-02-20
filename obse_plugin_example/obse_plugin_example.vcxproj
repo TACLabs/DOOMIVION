@@ -157,7 +157,6 @@
     <ClInclude Include="..\obse\obse\PluginAPI.h" />
     <ClInclude Include="..\obse\obse\Script.h" />
     <ClInclude Include="..\obse\obse\Utilities.h" />
-    <ClInclude Include="memory.h" />
     <ClInclude Include="sound.h" />
   </ItemGroup>
   <ItemGroup>
