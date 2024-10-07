@@ -50,7 +50,9 @@
     </ClCompile>
     <ClCompile Include="dllmain.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="sound.cpp" />
+    <ClCompile Include="GameplayTweaks.cpp" />
+    <ClCompile Include="MemoryFunctions.cpp" />
+    <ClCompile Include="SoundsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\obse\obse\GameActorValues.h">
@@ -101,7 +103,12 @@
     <ClInclude Include="..\obse\obse\Utilities.h">
       <Filter>obse</Filter>
     </ClInclude>
-    <ClInclude Include="sound.h" />
+    <ClInclude Include="Dash.h" />
+    <ClInclude Include="DoubleJump.h" />
+    <ClInclude Include="GameplayTweaks.h" />
+    <ClInclude Include="MemoryFunctions.h" />
+    <ClInclude Include="SoundsManager.h" />
+    <ClInclude Include="Tambouille.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\obse\obse\GameRTTI_1_2_416.inl">
