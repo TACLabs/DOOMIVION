@@ -12,6 +12,16 @@ namespace MemoryFunctions
 
 	}
 
+	void SafeWrite32(UInt32 addr, UInt32 data) {
+
+		UInt32	oldProtect;
+
+		VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
+		*((UInt32*)addr) = data;
+		VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
+
+	}
+
 	bool WriteMemory(int address, char* data, int length)
 	{
 		DWORD oldProtect = 0;

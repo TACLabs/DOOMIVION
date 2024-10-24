@@ -91,5 +91,9 @@ namespace Tambouille
 		//Récupére le pointeur vers le Character State
 		characterStateBasePtr = (uintptr_t)GetModuleHandle(NULL) + 0x7333B4;
 		MemoryFunctions::WriteJump(0x672A86, 0x672A8D, (int)recoverCharacterStatePointer);
+
+		//Code source volé de TES Reloaded pour transformer le jeu en Borderless Window
+		MemoryFunctions::SafeWrite32(0x0040E7C0, WS_POPUP);
+		MemoryFunctions::SafeWrite32(0x0040E805, WS_POPUP | WS_VISIBLE);
 	}
 }

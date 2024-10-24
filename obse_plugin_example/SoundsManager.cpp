@@ -10,7 +10,7 @@
 
 namespace SoundsManager
 {
-
+	std::string oblivionDirectory_;
 	std::map<std::string, std::string> soundsQueue;
 
 	typedef struct {
@@ -80,8 +80,8 @@ namespace SoundsManager
 
 	
 
-	void addSoundIntoQueue(const std::string& soundName, const std::string& OblivionDirectory) {
-		soundsQueue[soundName] = OblivionDirectory + "Data\\Sound\\fx\\DOOOOM\\" + soundName + ".wav";
+	void addSoundIntoQueue(const std::string& soundName) {
+		soundsQueue[soundName] = oblivionDirectory_ + "Data\\Sound\\fx\\DOOOOM\\" + soundName + ".wav";
 	}
 
 	SoundsCollection collection;
@@ -187,21 +187,22 @@ namespace SoundsManager
 
 	void Init(const char* OblivionDirectory)
 	{
+		oblivionDirectory_ = OblivionDirectory;
+
 		//Sons du Double Jump
-		addSoundIntoQueue("DoubleJumpOne", OblivionDirectory);
-		addSoundIntoQueue("DoubleJumpTwo", OblivionDirectory);
+		addSoundIntoQueue("DoubleJumpOne");
+		addSoundIntoQueue("DoubleJumpTwo");
 
 		//Sons du Dash
-		addSoundIntoQueue("DashOne", OblivionDirectory);
-		addSoundIntoQueue("DashTwo", OblivionDirectory);
-		addSoundIntoQueue("DashReloadOne", OblivionDirectory);
-		addSoundIntoQueue("DashReloadTwo", OblivionDirectory);
+		addSoundIntoQueue("DashOne");
+		addSoundIntoQueue("DashTwo");
+		addSoundIntoQueue("DashReloadOne");
+		addSoundIntoQueue("DashReloadTwo");
 
 		initCollection(soundsQueue.size());
 
 		//Hook pour charger les sons avec le volume adéquat
 		MemoryFunctions::WriteJump(0x6AA26E, 0x6AA274, (int)InitSoundsHook);
-		
 
 		//Hook pour recharger les sons quand le volume est modifié
 		MemoryFunctions::WriteJump(0x5957E4, 0x5957E9, (int)UpdateSoundsHook);
